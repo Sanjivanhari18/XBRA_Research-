@@ -1,0 +1,5 @@
+archetype,r_behavioral_pct,r_market_pct,r_interaction_pct,max_drawdown,sharpe_ratio
+buy_hold_drifter,33.3,33.3,33.3,-0.043,1.918
+day_trader,33.3,33.3,33.3,-0.042,2.373
+momentum_chaser,33.3,33.3,33.3,-0.026,2.815
+swing_trader,33.3,33.3,33.3,-0.1,1.167

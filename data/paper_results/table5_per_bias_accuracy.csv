@@ -1,0 +1,7 @@
+bias,correct,total,accuracy
+disposition,0,10,0.0
+herding,0,10,0.0
+loss_averse,4,10,0.4
+mixed,0,10,0.0
+neutral,7,10,0.7
+overconfident,7,10,0.7

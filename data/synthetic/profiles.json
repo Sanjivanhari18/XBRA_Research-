@@ -1,0 +1,792 @@
+[
+  {
+    "investor_id": "INV_HERDING_028",
+    "ground_truth_bias": "herding",
+    "n_trades": 83,
+    "portfolio_value": 100000.0,
+    "metadata": {
+      "profile_label": "herding",
+      "profile_description": "Trades in the direction of recent market momentum. Entry timing clusters around market sentiment spikes.",
+      "ground_truth_features": {
+        "momentum_follow_rate_expected": ">0.75"
+      }
+    }
+  },
+  {
+    "investor_id": "INV_NEUTRAL_055",
+    "ground_truth_bias": "neutral",
+    "n_trades": 45,
+    "portfolio_value": 100000.0,
+    "metadata": {
+      "profile_label": "neutral",
+      "profile_description": "Relatively efficient trader with no strong bias. Symmetric holding times and disciplined position sizing.",
+      "ground_truth_features": {
+        "holding_time_asymmetry_expected": "~1.0"
+      }
+    }
+  },
+  {
+    "investor_id": "INV_OVERCONFIDENT_018",
+    "ground_truth_bias": "overconfident",
+    "n_trades": 204,
+    "portfolio_value": 100000.0,
+    "metadata": {
+      "profile_label": "overconfident",
+      "profile_description": "High turnover, large concentrated positions. Trades frequently regardless of market conditions.",
+      "ground_truth_features": {
+        "turnover_rate_expected": ">30_trades_per_month",
+        "avg_position_size_expected": ">0.15"
+      }
+    }
+  },
+  {
+    "investor_id": "INV_HERDING_024",
+    "ground_truth_bias": "herding",
+    "n_trades": 80,
+    "portfolio_value": 100000.0,
+    "metadata": {
+      "profile_label": "herding",
+      "profile_description": "Trades in the direction of recent market momentum. Entry timing clusters around market sentiment spikes.",
+      "ground_truth_features": {
+        "momentum_follow_rate_expected": ">0.75"
+      }
+    }
+  },
+  {
+    "investor_id": "INV_LOSS_AVERSE_007",
+    "ground_truth_bias": "loss_averse",
+    "n_trades": 49,
+    "portfolio_value": 100000.0,
+    "metadata": {
+      "profile_label": "loss_averse",
+      "profile_description": "Holds losing trades 3-5\u00d7 longer than winning trades. Exits winners quickly on small gains.",
+      "ground_truth_features": {
+        "holding_time_asymmetry_expected": ">3.0",
+        "loss_cut_prob_expected": "<0.05"
+      }
+    }
+  },
+  {
+    "investor_id": "INV_OVERCONFIDENT_017",
+    "ground_truth_bias": "overconfident",
+    "n_trades": 126,
+    "portfolio_value": 100000.0,
+    "metadata": {
+      "profile_label": "overconfident",
+      "profile_description": "High turnover, large concentrated positions. Trades frequently regardless of market conditions.",
+      "ground_truth_features": {
+        "turnover_rate_expected": ">30_trades_per_month",
+        "avg_position_size_expected": ">0.15"
+      }
+    }
+  },
+  {
+    "investor_id": "INV_HERDING_027",
+    "ground_truth_bias": "herding",
+    "n_trades": 80,
+    "portfolio_value": 100000.0,
+    "metadata": {
+      "profile_label": "herding",
+      "profile_description": "Trades in the direction of recent market momentum. Entry timing clusters around market sentiment spikes.",
+      "ground_truth_features": {
+        "momentum_follow_rate_expected": ">0.75"
+      }
+    }
+  },
+  {
+    "investor_id": "INV_NEUTRAL_050",
+    "ground_truth_bias": "neutral",
+    "n_trades": 44,
+    "portfolio_value": 100000.0,
+    "metadata": {
+      "profile_label": "neutral",
+      "profile_description": "Relatively efficient trader with no strong bias. Symmetric holding times and disciplined position sizing.",
+      "ground_truth_features": {
+        "holding_time_asymmetry_expected": "~1.0"
+      }
+    }
+  },
+  {
+    "investor_id": "INV_NEUTRAL_059",
+    "ground_truth_bias": "neutral",
+    "n_trades": 44,
+    "portfolio_value": 100000.0,
+    "metadata": {
+      "profile_label": "neutral",
+      "profile_description": "Relatively efficient trader with no strong bias. Symmetric holding times and disciplined position sizing.",
+      "ground_truth_features": {
+        "holding_time_asymmetry_expected": "~1.0"
+      }
+    }
+  },
+  {
+    "investor_id": "INV_DISPOSITION_039",
+    "ground_truth_bias": "disposition",
+    "n_trades": 53,
+    "portfolio_value": 100000.0,
+    "metadata": {
+      "profile_label": "disposition",
+      "profile_description": "Systematically realises gains (sells winners) while holding losers indefinitely \u2014 the disposition effect.",
+      "ground_truth_features": {
+        "proportion_gains_realised_expected": ">0.70",
+        "proportion_losses_realised_expected": "<0.20"
+      }
+    }
+  },
+  {
+    "investor_id": "INV_MIXED_044",
+    "ground_truth_bias": "mixed",
+    "n_trades": 73,
+    "portfolio_value": 100000.0,
+    "metadata": {
+      "profile_label": "mixed",
+      "profile_description": "Exhibits moderate levels of multiple biases \u2014 mild loss-aversion combined with moderate herding.",
+      "ground_truth_features": {}
+    }
+  },
+  {
+    "investor_id": "INV_LOSS_AVERSE_005",
+    "ground_truth_bias": "loss_averse",
+    "n_trades": 53,
+    "portfolio_value": 100000.0,
+    "metadata": {
+      "profile_label": "loss_averse",
+      "profile_description": "Holds losing trades 3-5\u00d7 longer than winning trades. Exits winners quickly on small gains.",
+      "ground_truth_features": {
+        "holding_time_asymmetry_expected": ">3.0",
+        "loss_cut_prob_expected": "<0.05"
+      }
+    }
+  },
+  {
+    "investor_id": "INV_NEUTRAL_057",
+    "ground_truth_bias": "neutral",
+    "n_trades": 46,
+    "portfolio_value": 100000.0,
+    "metadata": {
+      "profile_label": "neutral",
+      "profile_description": "Relatively efficient trader with no strong bias. Symmetric holding times and disciplined position sizing.",
+      "ground_truth_features": {
+        "holding_time_asymmetry_expected": "~1.0"
+      }
+    }
+  },
+  {
+    "investor_id": "INV_HERDING_025",
+    "ground_truth_bias": "herding",
+    "n_trades": 80,
+    "portfolio_value": 100000.0,
+    "metadata": {
+      "profile_label": "herding",
+      "profile_description": "Trades in the direction of recent market momentum. Entry timing clusters around market sentiment spikes.",
+      "ground_truth_features": {
+        "momentum_follow_rate_expected": ">0.75"
+      }
+    }
+  },
+  {
+    "investor_id": "INV_HERDING_029",
+    "ground_truth_bias": "herding",
+    "n_trades": 82,
+    "portfolio_value": 100000.0,
+    "metadata": {
+      "profile_label": "herding",
+      "profile_description": "Trades in the direction of recent market momentum. Entry timing clusters around market sentiment spikes.",
+      "ground_truth_features": {
+        "momentum_follow_rate_expected": ">0.75"
+      }
+    }
+  },
+  {
+    "investor_id": "INV_DISPOSITION_031",
+    "ground_truth_bias": "disposition",
+    "n_trades": 57,
+    "portfolio_value": 100000.0,
+    "metadata": {
+      "profile_label": "disposition",
+      "profile_description": "Systematically realises gains (sells winners) while holding losers indefinitely \u2014 the disposition effect.",
+      "ground_truth_features": {
+        "proportion_gains_realised_expected": ">0.70",
+        "proportion_losses_realised_expected": "<0.20"
+      }
+    }
+  },
+  {
+    "investor_id": "INV_DISPOSITION_037",
+    "ground_truth_bias": "disposition",
+    "n_trades": 49,
+    "portfolio_value": 100000.0,
+    "metadata": {
+      "profile_label": "disposition",
+      "profile_description": "Systematically realises gains (sells winners) while holding losers indefinitely \u2014 the disposition effect.",
+      "ground_truth_features": {
+        "proportion_gains_realised_expected": ">0.70",
+        "proportion_losses_realised_expected": "<0.20"
+      }
+    }
+  },
+  {
+    "investor_id": "INV_HERDING_020",
+    "ground_truth_bias": "herding",
+    "n_trades": 84,
+    "portfolio_value": 100000.0,
+    "metadata": {
+      "profile_label": "herding",
+      "profile_description": "Trades in the direction of recent market momentum. Entry timing clusters around market sentiment spikes.",
+      "ground_truth_features": {
+        "momentum_follow_rate_expected": ">0.75"
+      }
+    }
+  },
+  {
+    "investor_id": "INV_NEUTRAL_052",
+    "ground_truth_bias": "neutral",
+    "n_trades": 43,
+    "portfolio_value": 100000.0,
+    "metadata": {
+      "profile_label": "neutral",
+      "profile_description": "Relatively efficient trader with no strong bias. Symmetric holding times and disciplined position sizing.",
+      "ground_truth_features": {
+        "holding_time_asymmetry_expected": "~1.0"
+      }
+    }
+  },
+  {
+    "investor_id": "INV_MIXED_049",
+    "ground_truth_bias": "mixed",
+    "n_trades": 63,
+    "portfolio_value": 100000.0,
+    "metadata": {
+      "profile_label": "mixed",
+      "profile_description": "Exhibits moderate levels of multiple biases \u2014 mild loss-aversion combined with moderate herding.",
+      "ground_truth_features": {}
+    }
+  },
+  {
+    "investor_id": "INV_MIXED_042",
+    "ground_truth_bias": "mixed",
+    "n_trades": 74,
+    "portfolio_value": 100000.0,
+    "metadata": {
+      "profile_label": "mixed",
+      "profile_description": "Exhibits moderate levels of multiple biases \u2014 mild loss-aversion combined with moderate herding.",
+      "ground_truth_features": {}
+    }
+  },
+  {
+    "investor_id": "INV_NEUTRAL_054",
+    "ground_truth_bias": "neutral",
+    "n_trades": 45,
+    "portfolio_value": 100000.0,
+    "metadata": {
+      "profile_label": "neutral",
+      "profile_description": "Relatively efficient trader with no strong bias. Symmetric holding times and disciplined position sizing.",
+      "ground_truth_features": {
+        "holding_time_asymmetry_expected": "~1.0"
+      }
+    }
+  },
+  {
+    "investor_id": "INV_MIXED_048",
+    "ground_truth_bias": "mixed",
+    "n_trades": 64,
+    "portfolio_value": 100000.0,
+    "metadata": {
+      "profile_label": "mixed",
+      "profile_description": "Exhibits moderate levels of multiple biases \u2014 mild loss-aversion combined with moderate herding.",
+      "ground_truth_features": {}
+    }
+  },
+  {
+    "investor_id": "INV_LOSS_AVERSE_004",
+    "ground_truth_bias": "loss_averse",
+    "n_trades": 59,
+    "portfolio_value": 100000.0,
+    "metadata": {
+      "profile_label": "loss_averse",
+      "profile_description": "Holds losing trades 3-5\u00d7 longer than winning trades. Exits winners quickly on small gains.",
+      "ground_truth_features": {
+        "holding_time_asymmetry_expected": ">3.0",
+        "loss_cut_prob_expected": "<0.05"
+      }
+    }
+  },
+  {
+    "investor_id": "INV_HERDING_026",
+    "ground_truth_bias": "herding",
+    "n_trades": 80,
+    "portfolio_value": 100000.0,
+    "metadata": {
+      "profile_label": "herding",
+      "profile_description": "Trades in the direction of recent market momentum. Entry timing clusters around market sentiment spikes.",
+      "ground_truth_features": {
+        "momentum_follow_rate_expected": ">0.75"
+      }
+    }
+  },
+  {
+    "investor_id": "INV_OVERCONFIDENT_015",
+    "ground_truth_bias": "overconfident",
+    "n_trades": 199,
+    "portfolio_value": 100000.0,
+    "metadata": {
+      "profile_label": "overconfident",
+      "profile_description": "High turnover, large concentrated positions. Trades frequently regardless of market conditions.",
+      "ground_truth_features": {
+        "turnover_rate_expected": ">30_trades_per_month",
+        "avg_position_size_expected": ">0.15"
+      }
+    }
+  },
+  {
+    "investor_id": "INV_DISPOSITION_032",
+    "ground_truth_bias": "disposition",
+    "n_trades": 69,
+    "portfolio_value": 100000.0,
+    "metadata": {
+      "profile_label": "disposition",
+      "profile_description": "Systematically realises gains (sells winners) while holding losers indefinitely \u2014 the disposition effect.",
+      "ground_truth_features": {
+        "proportion_gains_realised_expected": ">0.70",
+        "proportion_losses_realised_expected": "<0.20"
+      }
+    }
+  },
+  {
+    "investor_id": "INV_HERDING_023",
+    "ground_truth_bias": "herding",
+    "n_trades": 85,
+    "portfolio_value": 100000.0,
+    "metadata": {
+      "profile_label": "herding",
+      "profile_description": "Trades in the direction of recent market momentum. Entry timing clusters around market sentiment spikes.",
+      "ground_truth_features": {
+        "momentum_follow_rate_expected": ">0.75"
+      }
+    }
+  },
+  {
+    "investor_id": "INV_MIXED_040",
+    "ground_truth_bias": "mixed",
+    "n_trades": 66,
+    "portfolio_value": 100000.0,
+    "metadata": {
+      "profile_label": "mixed",
+      "profile_description": "Exhibits moderate levels of multiple biases \u2014 mild loss-aversion combined with moderate herding.",
+      "ground_truth_features": {}
+    }
+  },
+  {
+    "investor_id": "INV_LOSS_AVERSE_009",
+    "ground_truth_bias": "loss_averse",
+    "n_trades": 45,
+    "portfolio_value": 100000.0,
+    "metadata": {
+      "profile_label": "loss_averse",
+      "profile_description": "Holds losing trades 3-5\u00d7 longer than winning trades. Exits winners quickly on small gains.",
+      "ground_truth_features": {
+        "holding_time_asymmetry_expected": ">3.0",
+        "loss_cut_prob_expected": "<0.05"
+      }
+    }
+  },
+  {
+    "investor_id": "INV_NEUTRAL_056",
+    "ground_truth_bias": "neutral",
+    "n_trades": 40,
+    "portfolio_value": 100000.0,
+    "metadata": {
+      "profile_label": "neutral",
+      "profile_description": "Relatively efficient trader with no strong bias. Symmetric holding times and disciplined position sizing.",
+      "ground_truth_features": {
+        "holding_time_asymmetry_expected": "~1.0"
+      }
+    }
+  },
+  {
+    "investor_id": "INV_HERDING_021",
+    "ground_truth_bias": "herding",
+    "n_trades": 83,
+    "portfolio_value": 100000.0,
+    "metadata": {
+      "profile_label": "herding",
+      "profile_description": "Trades in the direction of recent market momentum. Entry timing clusters around market sentiment spikes.",
+      "ground_truth_features": {
+        "momentum_follow_rate_expected": ">0.75"
+      }
+    }
+  },
+  {
+    "investor_id": "INV_OVERCONFIDENT_016",
+    "ground_truth_bias": "overconfident",
+    "n_trades": 189,
+    "portfolio_value": 100000.0,
+    "metadata": {
+      "profile_label": "overconfident",
+      "profile_description": "High turnover, large concentrated positions. Trades frequently regardless of market conditions.",
+      "ground_truth_features": {
+        "turnover_rate_expected": ">30_trades_per_month",
+        "avg_position_size_expected": ">0.15"
+      }
+    }
+  },
+  {
+    "investor_id": "INV_LOSS_AVERSE_003",
+    "ground_truth_bias": "loss_averse",
+    "n_trades": 54,
+    "portfolio_value": 100000.0,
+    "metadata": {
+      "profile_label": "loss_averse",
+      "profile_description": "Holds losing trades 3-5\u00d7 longer than winning trades. Exits winners quickly on small gains.",
+      "ground_truth_features": {
+        "holding_time_asymmetry_expected": ">3.0",
+        "loss_cut_prob_expected": "<0.05"
+      }
+    }
+  },
+  {
+    "investor_id": "INV_DISPOSITION_034",
+    "ground_truth_bias": "disposition",
+    "n_trades": 64,
+    "portfolio_value": 100000.0,
+    "metadata": {
+      "profile_label": "disposition",
+      "profile_description": "Systematically realises gains (sells winners) while holding losers indefinitely \u2014 the disposition effect.",
+      "ground_truth_features": {
+        "proportion_gains_realised_expected": ">0.70",
+        "proportion_losses_realised_expected": "<0.20"
+      }
+    }
+  },
+  {
+    "investor_id": "INV_DISPOSITION_030",
+    "ground_truth_bias": "disposition",
+    "n_trades": 60,
+    "portfolio_value": 100000.0,
+    "metadata": {
+      "profile_label": "disposition",
+      "profile_description": "Systematically realises gains (sells winners) while holding losers indefinitely \u2014 the disposition effect.",
+      "ground_truth_features": {
+        "proportion_gains_realised_expected": ">0.70",
+        "proportion_losses_realised_expected": "<0.20"
+      }
+    }
+  },
+  {
+    "investor_id": "INV_OVERCONFIDENT_010",
+    "ground_truth_bias": "overconfident",
+    "n_trades": 200,
+    "portfolio_value": 100000.0,
+    "metadata": {
+      "profile_label": "overconfident",
+      "profile_description": "High turnover, large concentrated positions. Trades frequently regardless of market conditions.",
+      "ground_truth_features": {
+        "turnover_rate_expected": ">30_trades_per_month",
+        "avg_position_size_expected": ">0.15"
+      }
+    }
+  },
+  {
+    "investor_id": "INV_MIXED_046",
+    "ground_truth_bias": "mixed",
+    "n_trades": 65,
+    "portfolio_value": 100000.0,
+    "metadata": {
+      "profile_label": "mixed",
+      "profile_description": "Exhibits moderate levels of multiple biases \u2014 mild loss-aversion combined with moderate herding.",
+      "ground_truth_features": {}
+    }
+  },
+  {
+    "investor_id": "INV_NEUTRAL_053",
+    "ground_truth_bias": "neutral",
+    "n_trades": 45,
+    "portfolio_value": 100000.0,
+    "metadata": {
+      "profile_label": "neutral",
+      "profile_description": "Relatively efficient trader with no strong bias. Symmetric holding times and disciplined position sizing.",
+      "ground_truth_features": {
+        "holding_time_asymmetry_expected": "~1.0"
+      }
+    }
+  },
+  {
+    "investor_id": "INV_LOSS_AVERSE_006",
+    "ground_truth_bias": "loss_averse",
+    "n_trades": 57,
+    "portfolio_value": 100000.0,
+    "metadata": {
+      "profile_label": "loss_averse",
+      "profile_description": "Holds losing trades 3-5\u00d7 longer than winning trades. Exits winners quickly on small gains.",
+      "ground_truth_features": {
+        "holding_time_asymmetry_expected": ">3.0",
+        "loss_cut_prob_expected": "<0.05"
+      }
+    }
+  },
+  {
+    "investor_id": "INV_DISPOSITION_038",
+    "ground_truth_bias": "disposition",
+    "n_trades": 57,
+    "portfolio_value": 100000.0,
+    "metadata": {
+      "profile_label": "disposition",
+      "profile_description": "Systematically realises gains (sells winners) while holding losers indefinitely \u2014 the disposition effect.",
+      "ground_truth_features": {
+        "proportion_gains_realised_expected": ">0.70",
+        "proportion_losses_realised_expected": "<0.20"
+      }
+    }
+  },
+  {
+    "investor_id": "INV_OVERCONFIDENT_011",
+    "ground_truth_bias": "overconfident",
+    "n_trades": 204,
+    "portfolio_value": 100000.0,
+    "metadata": {
+      "profile_label": "overconfident",
+      "profile_description": "High turnover, large concentrated positions. Trades frequently regardless of market conditions.",
+      "ground_truth_features": {
+        "turnover_rate_expected": ">30_trades_per_month",
+        "avg_position_size_expected": ">0.15"
+      }
+    }
+  },
+  {
+    "investor_id": "INV_NEUTRAL_051",
+    "ground_truth_bias": "neutral",
+    "n_trades": 45,
+    "portfolio_value": 100000.0,
+    "metadata": {
+      "profile_label": "neutral",
+      "profile_description": "Relatively efficient trader with no strong bias. Symmetric holding times and disciplined position sizing.",
+      "ground_truth_features": {
+        "holding_time_asymmetry_expected": "~1.0"
+      }
+    }
+  },
+  {
+    "investor_id": "INV_MIXED_041",
+    "ground_truth_bias": "mixed",
+    "n_trades": 71,
+    "portfolio_value": 100000.0,
+    "metadata": {
+      "profile_label": "mixed",
+      "profile_description": "Exhibits moderate levels of multiple biases \u2014 mild loss-aversion combined with moderate herding.",
+      "ground_truth_features": {}
+    }
+  },
+  {
+    "investor_id": "INV_HERDING_022",
+    "ground_truth_bias": "herding",
+    "n_trades": 85,
+    "portfolio_value": 100000.0,
+    "metadata": {
+      "profile_label": "herding",
+      "profile_description": "Trades in the direction of recent market momentum. Entry timing clusters around market sentiment spikes.",
+      "ground_truth_features": {
+        "momentum_follow_rate_expected": ">0.75"
+      }
+    }
+  },
+  {
+    "investor_id": "INV_OVERCONFIDENT_019",
+    "ground_truth_bias": "overconfident",
+    "n_trades": 144,
+    "portfolio_value": 100000.0,
+    "metadata": {
+      "profile_label": "overconfident",
+      "profile_description": "High turnover, large concentrated positions. Trades frequently regardless of market conditions.",
+      "ground_truth_features": {
+        "turnover_rate_expected": ">30_trades_per_month",
+        "avg_position_size_expected": ">0.15"
+      }
+    }
+  },
+  {
+    "investor_id": "INV_DISPOSITION_035",
+    "ground_truth_bias": "disposition",
+    "n_trades": 58,
+    "portfolio_value": 100000.0,
+    "metadata": {
+      "profile_label": "disposition",
+      "profile_description": "Systematically realises gains (sells winners) while holding losers indefinitely \u2014 the disposition effect.",
+      "ground_truth_features": {
+        "proportion_gains_realised_expected": ">0.70",
+        "proportion_losses_realised_expected": "<0.20"
+      }
+    }
+  },
+  {
+    "investor_id": "INV_LOSS_AVERSE_000",
+    "ground_truth_bias": "loss_averse",
+    "n_trades": 55,
+    "portfolio_value": 100000.0,
+    "metadata": {
+      "profile_label": "loss_averse",
+      "profile_description": "Holds losing trades 3-5\u00d7 longer than winning trades. Exits winners quickly on small gains.",
+      "ground_truth_features": {
+        "holding_time_asymmetry_expected": ">3.0",
+        "loss_cut_prob_expected": "<0.05"
+      }
+    }
+  },
+  {
+    "investor_id": "INV_MIXED_047",
+    "ground_truth_bias": "mixed",
+    "n_trades": 70,
+    "portfolio_value": 100000.0,
+    "metadata": {
+      "profile_label": "mixed",
+      "profile_description": "Exhibits moderate levels of multiple biases \u2014 mild loss-aversion combined with moderate herding.",
+      "ground_truth_features": {}
+    }
+  },
+  {
+    "investor_id": "INV_MIXED_045",
+    "ground_truth_bias": "mixed",
+    "n_trades": 72,
+    "portfolio_value": 100000.0,
+    "metadata": {
+      "profile_label": "mixed",
+      "profile_description": "Exhibits moderate levels of multiple biases \u2014 mild loss-aversion combined with moderate herding.",
+      "ground_truth_features": {}
+    }
+  },
+  {
+    "investor_id": "INV_OVERCONFIDENT_012",
+    "ground_truth_bias": "overconfident",
+    "n_trades": 168,
+    "portfolio_value": 100000.0,
+    "metadata": {
+      "profile_label": "overconfident",
+      "profile_description": "High turnover, large concentrated positions. Trades frequently regardless of market conditions.",
+      "ground_truth_features": {
+        "turnover_rate_expected": ">30_trades_per_month",
+        "avg_position_size_expected": ">0.15"
+      }
+    }
+  },
+  {
+    "investor_id": "INV_MIXED_043",
+    "ground_truth_bias": "mixed",
+    "n_trades": 75,
+    "portfolio_value": 100000.0,
+    "metadata": {
+      "profile_label": "mixed",
+      "profile_description": "Exhibits moderate levels of multiple biases \u2014 mild loss-aversion combined with moderate herding.",
+      "ground_truth_features": {}
+    }
+  },
+  {
+    "investor_id": "INV_OVERCONFIDENT_014",
+    "ground_truth_bias": "overconfident",
+    "n_trades": 188,
+    "portfolio_value": 100000.0,
+    "metadata": {
+      "profile_label": "overconfident",
+      "profile_description": "High turnover, large concentrated positions. Trades frequently regardless of market conditions.",
+      "ground_truth_features": {
+        "turnover_rate_expected": ">30_trades_per_month",
+        "avg_position_size_expected": ">0.15"
+      }
+    }
+  },
+  {
+    "investor_id": "INV_NEUTRAL_058",
+    "ground_truth_bias": "neutral",
+    "n_trades": 44,
+    "portfolio_value": 100000.0,
+    "metadata": {
+      "profile_label": "neutral",
+      "profile_description": "Relatively efficient trader with no strong bias. Symmetric holding times and disciplined position sizing.",
+      "ground_truth_features": {
+        "holding_time_asymmetry_expected": "~1.0"
+      }
+    }
+  },
+  {
+    "investor_id": "INV_LOSS_AVERSE_002",
+    "ground_truth_bias": "loss_averse",
+    "n_trades": 60,
+    "portfolio_value": 100000.0,
+    "metadata": {
+      "profile_label": "loss_averse",
+      "profile_description": "Holds losing trades 3-5\u00d7 longer than winning trades. Exits winners quickly on small gains.",
+      "ground_truth_features": {
+        "holding_time_asymmetry_expected": ">3.0",
+        "loss_cut_prob_expected": "<0.05"
+      }
+    }
+  },
+  {
+    "investor_id": "INV_DISPOSITION_036",
+    "ground_truth_bias": "disposition",
+    "n_trades": 71,
+    "portfolio_value": 100000.0,
+    "metadata": {
+      "profile_label": "disposition",
+      "profile_description": "Systematically realises gains (sells winners) while holding losers indefinitely \u2014 the disposition effect.",
+      "ground_truth_features": {
+        "proportion_gains_realised_expected": ">0.70",
+        "proportion_losses_realised_expected": "<0.20"
+      }
+    }
+  },
+  {
+    "investor_id": "INV_DISPOSITION_033",
+    "ground_truth_bias": "disposition",
+    "n_trades": 60,
+    "portfolio_value": 100000.0,
+    "metadata": {
+      "profile_label": "disposition",
+      "profile_description": "Systematically realises gains (sells winners) while holding losers indefinitely \u2014 the disposition effect.",
+      "ground_truth_features": {
+        "proportion_gains_realised_expected": ">0.70",
+        "proportion_losses_realised_expected": "<0.20"
+      }
+    }
+  },
+  {
+    "investor_id": "INV_LOSS_AVERSE_001",
+    "ground_truth_bias": "loss_averse",
+    "n_trades": 60,
+    "portfolio_value": 100000.0,
+    "metadata": {
+      "profile_label": "loss_averse",
+      "profile_description": "Holds losing trades 3-5\u00d7 longer than winning trades. Exits winners quickly on small gains.",
+      "ground_truth_features": {
+        "holding_time_asymmetry_expected": ">3.0",
+        "loss_cut_prob_expected": "<0.05"
+      }
+    }
+  },
+  {
+    "investor_id": "INV_OVERCONFIDENT_013",
+    "ground_truth_bias": "overconfident",
+    "n_trades": 192,
+    "portfolio_value": 100000.0,
+    "metadata": {
+      "profile_label": "overconfident",
+      "profile_description": "High turnover, large concentrated positions. Trades frequently regardless of market conditions.",
+      "ground_truth_features": {
+        "turnover_rate_expected": ">30_trades_per_month",
+        "avg_position_size_expected": ">0.15"
+      }
+    }
+  },
+  {
+    "investor_id": "INV_LOSS_AVERSE_008",
+    "ground_truth_bias": "loss_averse",
+    "n_trades": 44,
+    "portfolio_value": 100000.0,
+    "metadata": {
+      "profile_label": "loss_averse",
+      "profile_description": "Holds losing trades 3-5\u00d7 longer than winning trades. Exits winners quickly on small gains.",
+      "ground_truth_features": {
+        "holding_time_asymmetry_expected": ">3.0",
+        "loss_cut_prob_expected": "<0.05"
+      }
+    }
+  }
+]

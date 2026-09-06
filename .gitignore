@@ -1,0 +1,35 @@
+__pycache__/
+*.py[cod]
+*.pyo
+.venv/
+venv/
+env/
+*.egg-info/
+dist/
+build/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Data (large files — commit only schemas/samples)
+data/raw/
+data/processed/
+data/synthetic/*.parquet
+data/synthetic/*.csv
+
+# Models downloaded at runtime
+models/
+
+# Streamlit
+.streamlit/
+
+# Notebooks checkpoints
+.ipynb_checkpoints/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Secrets
+.env
+*.key

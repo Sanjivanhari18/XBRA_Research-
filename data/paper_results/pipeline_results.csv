@@ -1,0 +1,11 @@
+investor_id,predicted_bias,loss_aversion,overconfidence,herding,disposition,max_drawdown,sharpe_ratio,r_behavioral_pct,r_market_pct,r_interaction_pct,peer_percentile,archetype
+INV_HERDING_028,herding,0.0119,0.014,0.3689,0.0,-0.0386,3.7806,100.0,0.0,0.0,43.3,day_trader
+INV_NEUTRAL_055,loss_averse,0.2511,0.0126,0.0,0.0,-0.0201,1.9233,100.0,0.0,0.0,11.7,momentum_chaser
+INV_OVERCONFIDENT_018,overconfident,0.2424,0.5847,0.0,0.0,-0.1801,-0.4899,100.0,0.0,0.0,100.0,swing_trader
+INV_HERDING_024,herding,0.0196,0.0173,0.3349,0.0196,-0.0276,2.8341,100.0,0.0,0.0,28.3,day_trader
+INV_LOSS_AVERSE_007,loss_averse,0.654,0.0104,0.1335,0.2021,-0.0533,-1.5893,100.0,0.0,0.0,65.0,buy_hold_drifter
+INV_OVERCONFIDENT_017,overconfident,0.2416,0.6148,0.0,0.0,-0.0878,0.774,100.0,0.0,0.0,91.7,swing_trader
+INV_HERDING_027,herding,0.0198,0.0526,0.3183,0.0,-0.0378,1.518,100.0,0.0,0.0,40.0,day_trader
+INV_NEUTRAL_050,disposition,0.0931,0.1107,0.0608,0.1255,-0.0252,3.7987,100.0,0.0,0.0,23.3,momentum_chaser
+INV_NEUTRAL_059,disposition,0.2107,0.0737,0.2424,0.2782,-0.0127,4.8375,100.0,0.0,0.0,5.0,momentum_chaser
+INV_DISPOSITION_039,loss_averse,0.6635,0.0071,0.1747,0.2493,-0.0753,1.1411,100.0,0.0,0.0,90.0,buy_hold_drifter
