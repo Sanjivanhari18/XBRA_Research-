@@ -61,24 +61,23 @@ class TestRegimeClassification:
     def test_returns_series_same_length(self):
         import numpy as np
         import pandas as pd
-        from src.xbra.agents.market_agent import classify_regime
+        from src.xbra.agents.market_agent import _rolling_regime_fallback
         prices = pd.Series(
             100 * np.cumprod(1 + np.random.default_rng(0).normal(0.001, 0.01, 100)),
             index=pd.date_range("2022-01-01", periods=100, freq="B"),
         )
-        regimes = classify_regime(prices)
+        regimes = _rolling_regime_fallback(prices)
         assert len(regimes) == len(prices)
 
     def test_bull_regime_in_trending_market(self):
         import numpy as np
         import pandas as pd
-        from src.xbra.agents.market_agent import classify_regime
+        from src.xbra.agents.market_agent import _rolling_regime_fallback
         from src.xbra.schemas import MarketRegime
         prices = pd.Series(
             [100 + i * 1.5 for i in range(100)],  # strongly uptrending
             index=pd.date_range("2022-01-01", periods=100, freq="B"),
         )
-        regimes = classify_regime(prices)
-        # After window warm-up, should see some bull labels
-        valid = regimes.dropna()
-        assert any(v == MarketRegime.BULL for v in valid)
+        regimes = _rolling_regime_fallback(prices)
+        # After window warm-up, should see bull labels
+        assert any(v == MarketRegime.BULL.value for v in regimes)

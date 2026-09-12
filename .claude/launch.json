@@ -3,8 +3,8 @@
   "configurations": [
     {
       "name": "XBRA Streamlit",
-      "runtimeExecutable": "/Users/sanjivan/Documents/Gmu Research/triage-poc/.venv/bin/streamlit",
-      "runtimeArgs": ["run", "src/xbra/ui/app.py", "--server.port", "8501", "--server.headless", "true"],
+      "runtimeExecutable": "/bin/bash",
+      "runtimeArgs": ["/Users/sanjivan/Documents/XBRA imple/.claude/run_app.sh"],
       "port": 8501
     }
   ]

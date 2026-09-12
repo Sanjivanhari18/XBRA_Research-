@@ -17,7 +17,7 @@ torch>=2.3.0          # CPU-only install fine: pip install torch --index-url htt
 sentencepiece>=0.2.0
 
 # ML / explainability
-xgboost>=2.1.0
+xgboost>=1.7.6,<2.0  # 2.x requires libomp on macOS; use native xgb.DMatrix API (no XGBClassifier)
 lightgbm>=4.4.0
 shap>=0.46.0
 scikit-learn>=1.5.0
@@ -30,6 +30,8 @@ quantstats>=0.0.62
 pandas>=2.2.0
 numpy>=1.26.0
 scipy>=1.13.0
+ta>=0.11.0
+hmmlearn>=0.3.0
 
 # Visualization
 plotly>=5.23.0

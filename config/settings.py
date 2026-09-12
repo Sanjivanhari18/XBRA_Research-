@@ -12,9 +12,16 @@ RAW_DIR = DATA_DIR / "raw"
 SYNTHETIC_DIR = DATA_DIR / "synthetic"
 PROCESSED_DIR = DATA_DIR / "processed"
 MODELS_DIR = ROOT / "models"
+DOCS_DIR = ROOT / "docs"
 
-for _d in [RAW_DIR, SYNTHETIC_DIR, PROCESSED_DIR, MODELS_DIR]:
+for _d in [RAW_DIR, SYNTHETIC_DIR, PROCESSED_DIR, MODELS_DIR, DOCS_DIR]:
     _d.mkdir(parents=True, exist_ok=True)
+
+# ---------------------------------------------------------------------------
+# Ingestion / data quality
+# ---------------------------------------------------------------------------
+MIN_TRADES = 20                  # minimum closed positions required for analysis
+MIN_DATA_QUALITY_THRESHOLD = 0.70   # below this, warn and proceed with caution
 
 # ---------------------------------------------------------------------------
 # Ollama / LLM

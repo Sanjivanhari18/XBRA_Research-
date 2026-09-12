@@ -1,16 +1,40 @@
-"""Phase 3a — Behavior Agent: feature engineering, deviation scoring, bias detection."""
+"""Phase 3a — Behavior Agent: feature engineering, deviation scoring, bias detection.
+
+Bias classification uses a trained XGBoost multi-class model (6 classes) as the
+primary predictor. Rule-based BIAS_RULES remain as a fallback and for confidence
+scoring when fewer than MIN_TRADES examples are available.
+"""
 
 from __future__ import annotations
 
-from typing import Any, Dict, List
+import pickle
+from typing import Any, Dict, List, Optional, Tuple
 
 import numpy as np
 import pandas as pd
 
+from config.settings import MODELS_DIR, SYNTHETIC_DIR
 from src.xbra.llm.client import get_analysis_llm, invoke
 from src.xbra.llm.prompts import BEHAVIOR_ANALYSIS_PROMPT, parse_behavior_response
 from src.xbra.orchestrator.state import XBRAStateDict
-from src.xbra.schemas import BehaviorAgentOutput, InvestorProfile
+from src.xbra.schemas import BehaviorAgentOutput, BiasType, InvestorProfile
+from src.xbra.utils.logging import logger
+
+_BIAS_MODEL_PATH = MODELS_DIR / "bias_xgb.pkl"
+
+# Feature columns used for the bias classifier (must match engineer_features output)
+BIAS_FEATURE_COLS = [
+    "holding_time_asymmetry",
+    "post_loss_reentry_speed",
+    "position_size_cv",
+    "trade_frequency",
+    "early_exit_winner_rate",
+    "winner_ratio",
+    "avg_gain_magnitude",
+    "avg_loss_magnitude",
+    "n_trades",
+    "momentum_follow_rate",
+]
 
 
 # ---------------------------------------------------------------------------
@@ -86,6 +110,138 @@ def engineer_features(profile: InvestorProfile) -> Dict[str, float]:
         "n_trades":                len(df),
         "momentum_follow_rate":    round(momentum_follow_rate_proxy, 4),
     }
+
+
+# ---------------------------------------------------------------------------
+# XGBoost multi-class bias classifier
+# ---------------------------------------------------------------------------
+
+def train_or_load_bias_classifier() -> Optional[Dict[str, Any]]:
+    """Train (and cache) or load an XGBoost 6-class bias classifier.
+
+    Returns a dict {model, label_encoder, feat_cols} or None if training data
+    is unavailable.  Training uses the full synthetic population; the model is
+    then used for all-investor inference (population-level evaluation) and for
+    single-investor prediction at inference time.
+    """
+    if _BIAS_MODEL_PATH.exists():
+        try:
+            with open(_BIAS_MODEL_PATH, "rb") as f:
+                return pickle.load(f)
+        except Exception:
+            pass  # corrupt cache → retrain
+
+    try:
+        import xgboost as xgb
+        from sklearn.preprocessing import LabelEncoder
+        from sklearn.model_selection import StratifiedKFold
+        from sklearn.metrics import accuracy_score as _acc
+    except ImportError:
+        logger.warning("[BehaviorAgent] XGBoost not installed — falling back to rule-based classification")
+        return None
+
+    try:
+        from src.xbra.data.registry import DataRegistry
+        from src.xbra.ingestion.loaders import load_from_parquet
+
+        gt = DataRegistry.ground_truth()
+        feat_rows, labels = [], []
+        for _, row in gt.iterrows():
+            try:
+                profile, _ = load_from_parquet(row["investor_id"], SYNTHETIC_DIR / "trades.parquet")
+                feat = engineer_features(profile)
+                feat_rows.append(feat)
+                labels.append(row["ground_truth_bias"])
+            except Exception:
+                continue
+
+        if len(feat_rows) < 20:
+            logger.warning("[BehaviorAgent] Too few training samples for XGBoost bias classifier")
+            return None
+
+        df = pd.DataFrame(feat_rows)[BIAS_FEATURE_COLS].fillna(0)
+        le = LabelEncoder()
+        y  = le.fit_transform(labels)
+        n_classes = len(le.classes_)
+
+        xgb_params = {
+            "objective":        "multi:softprob",
+            "num_class":        n_classes,
+            "max_depth":        4,
+            "eta":              0.05,
+            "subsample":        0.8,
+            "colsample_bytree": 0.8,
+            "seed":             42,
+            "eval_metric":      "mlogloss",
+            "verbosity":        0,
+        }
+
+        # 5-fold CV for auditing
+        skf = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
+        cv_accs = []
+        for tr_idx, va_idx in skf.split(df.values, y):
+            dtrain = xgb.DMatrix(df.values[tr_idx], label=y[tr_idx])
+            dval   = xgb.DMatrix(df.values[va_idx])
+            bst_cv = xgb.train(xgb_params, dtrain, num_boost_round=400, verbose_eval=False)
+            proba_cv = bst_cv.predict(dval).reshape(-1, n_classes)
+            cv_accs.append(_acc(y[va_idx], proba_cv.argmax(axis=1)))
+        cv_acc = float(np.mean(cv_accs))
+        logger.info(f"[BehaviorAgent] Bias classifier 5-fold CV accuracy: {cv_acc:.3f}")
+
+        # Final model on full data
+        dtrain_full = xgb.DMatrix(df.values, label=y)
+        booster = xgb.train(xgb_params, dtrain_full, num_boost_round=400, verbose_eval=False)
+
+        bundle = {"booster": booster, "label_encoder": le, "feat_cols": BIAS_FEATURE_COLS,
+                  "n_classes": n_classes}
+        with open(_BIAS_MODEL_PATH, "wb") as f:
+            pickle.dump(bundle, f)
+
+        return bundle
+
+    except Exception as exc:
+        logger.warning(f"[BehaviorAgent] Bias classifier training failed: {exc}")
+        return None
+
+
+_bias_classifier: Optional[Dict[str, Any]] = None
+
+
+def _get_bias_classifier() -> Optional[Dict[str, Any]]:
+    global _bias_classifier
+    if _bias_classifier is None:
+        _bias_classifier = train_or_load_bias_classifier()
+    return _bias_classifier
+
+
+def predict_bias_class(features: Dict[str, float]) -> Tuple[BiasType, float, Dict[str, float]]:
+    """Predict the dominant bias using the XGBoost classifier.
+
+    Returns:
+        (predicted_bias, confidence, {bias: probability_score})
+    Falls back to rule-based dominant-bias logic if classifier is unavailable.
+    """
+    bundle = _get_bias_classifier()
+    if bundle is None:
+        return BiasType.NEUTRAL, 0.0, {}
+
+    le   = bundle["label_encoder"]
+    cols = bundle["feat_cols"]
+
+    import xgboost as xgb
+    booster    = bundle["booster"]
+    n_classes  = bundle["n_classes"]
+
+    row_arr = np.array([[features.get(c, 0.0) for c in cols]])
+    dmat    = xgb.DMatrix(row_arr)
+    proba   = booster.predict(dmat).reshape(-1, n_classes)[0]   # shape: (n_classes,)
+    pred_idx    = int(np.argmax(proba))
+    pred_label  = le.inverse_transform([pred_idx])[0]
+    confidence  = float(proba[pred_idx])
+
+    proba_dict = {le.inverse_transform([i])[0]: round(float(p), 4) for i, p in enumerate(proba)}
+
+    return BiasType(pred_label), round(confidence, 4), proba_dict
 
 
 # ---------------------------------------------------------------------------
@@ -269,27 +425,62 @@ def behavior_node(state: XBRAStateDict) -> dict:
     features     = engineer_features(profile)
     pop_baseline = _load_population_baseline()
     dev_scores   = compute_deviation_scores(features, pop_baseline)
-    bias_scores  = apply_bias_rules(dev_scores)
-    confidence   = compute_confidence(bias_scores, features.get("n_trades", 0))
-    evidence     = find_evidencing_trades(profile, bias_scores)
-    llm_result   = llm_interpret(investor_id, features, pop_baseline)
 
-    # Merge LLM bias scores with rule-based (LLM refines if available)
-    if llm_result.get("bias_scores"):
+    # ── Primary: XGBoost multi-class classifier ───────────────────────────────
+    xgb_bias, xgb_conf, xgb_proba = predict_bias_class(features)
+    classifier_available = xgb_conf > 0.0
+
+    # ── Secondary: rule-based scores for per-bias continuous signals ──────────
+    rule_scores = apply_bias_rules(dev_scores)
+
+    # Build final bias scores: XGBoost probabilities as the primary signal;
+    # rule-based scores used to set continuous magnitude (not just the top class)
+    if classifier_available:
+        # Use XGBoost class probabilities as the bias scores
+        bias_scores = {
+            "loss_aversion":  xgb_proba.get("loss_averse",    0.0),
+            "overconfidence": xgb_proba.get("overconfident",  0.0),
+            "herding":        xgb_proba.get("herding",        0.0),
+            "disposition":    xgb_proba.get("disposition",    0.0),
+        }
+        # Mixed: flag when no single class dominates (highest probability < 0.50)
+        if xgb_conf < 0.50 and xgb_bias not in (BiasType.NEUTRAL, BiasType.MIXED):
+            xgb_bias = BiasType.MIXED
+    else:
+        # Fallback to rule-based
+        bias_scores = rule_scores
+
+    confidence = compute_confidence(bias_scores, features.get("n_trades", 0))
+
+    # Attach classifier confidence to each bias
+    if classifier_available:
+        for k in confidence:
+            bias_map = {"loss_aversion": "loss_averse", "overconfidence": "overconfident",
+                        "herding": "herding", "disposition": "disposition"}
+            p = xgb_proba.get(bias_map.get(k, k), 0.0)
+            confidence[k] = round(p * min(features.get("n_trades", 0) / 100.0, 1.0), 4)
+
+    evidence   = find_evidencing_trades(profile, bias_scores)
+    llm_result = llm_interpret(investor_id, features, pop_baseline)
+
+    # LLM refinement (best-effort; never overrides classifier)
+    if llm_result.get("bias_scores") and not classifier_available:
         for b, s in llm_result["bias_scores"].items():
             if b in bias_scores:
                 bias_scores[b] = round((bias_scores[b] + float(s)) / 2, 4)
 
     output = BehaviorAgentOutput(
-        investor_id          = investor_id,
-        loss_aversion_score  = bias_scores.get("loss_aversion", 0.0),
-        overconfidence_score = bias_scores.get("overconfidence", 0.0),
-        herding_score        = bias_scores.get("herding", 0.0),
-        disposition_score    = bias_scores.get("disposition", 0.0),
-        confidence_per_bias  = confidence,
-        evidencing_trade_ids = evidence,
-        llm_summary          = llm_result.get("reasoning"),
-        features             = features,
+        investor_id           = investor_id,
+        loss_aversion_score   = bias_scores.get("loss_aversion", 0.0),
+        overconfidence_score  = bias_scores.get("overconfidence", 0.0),
+        herding_score         = bias_scores.get("herding", 0.0),
+        disposition_score     = bias_scores.get("disposition", 0.0),
+        predicted_bias        = xgb_bias.value if classifier_available else None,
+        classifier_confidence = xgb_conf if classifier_available else 0.0,
+        confidence_per_bias   = confidence,
+        evidencing_trade_ids  = evidence,
+        llm_summary           = llm_result.get("reasoning"),
+        features              = features,
     )
 
     return {"behavior_output": output.model_dump(), "stage": "behavior_done"}

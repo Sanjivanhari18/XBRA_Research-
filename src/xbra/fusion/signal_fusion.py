@@ -16,6 +16,8 @@ from src.xbra.schemas import (
     StrategyAgentOutput,
 )
 
+# BiasType already imported above; also needed inside fusion_node (imported locally for clarity)
+
 FUSION_WEIGHTS = {
     "behavior": 0.60,
     "strategy": 0.25,
@@ -131,17 +133,26 @@ def fusion_node(state: XBRAStateDict) -> dict:
     strategy = StrategyAgentOutput(**strategy_dict) if isinstance(strategy_dict, dict) else strategy_dict
 
     fused_scores = weighted_combine(behavior, market, strategy)
-    dominant     = pick_dominant_bias(fused_scores)
-    silhouette   = 0.0   # population silhouette computed in Phase 7
+    rule_dominant = pick_dominant_bias(fused_scores)
+    silhouette    = 0.0   # population silhouette computed in Phase 7
+
+    # Use the XGBoost classifier prediction when available (preferred over rule-based)
+    if behavior.predicted_bias and behavior.classifier_confidence > 0.0:
+        try:
+            predicted = BiasType(behavior.predicted_bias)
+        except ValueError:
+            predicted = rule_dominant
+    else:
+        predicted = rule_dominant
 
     output = FusedBiasVector(
-        investor_id    = behavior.investor_id,
-        loss_aversion  = fused_scores.get("loss_aversion", 0.0),
-        overconfidence = fused_scores.get("overconfidence", 0.0),
-        herding        = fused_scores.get("herding", 0.0),
-        disposition    = fused_scores.get("disposition", 0.0),
-        dominant_bias  = dominant,
+        investor_id      = behavior.investor_id,
+        loss_aversion    = fused_scores.get("loss_aversion", 0.0),
+        overconfidence   = fused_scores.get("overconfidence", 0.0),
+        herding          = fused_scores.get("herding", 0.0),
+        disposition      = fused_scores.get("disposition", 0.0),
+        dominant_bias    = predicted,
         silhouette_score = silhouette,
-        predicted_bias = dominant,
+        predicted_bias   = predicted,
     )
     return {"fused_bias": output.model_dump(), "stage": "fusion_done"}
