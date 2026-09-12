@@ -22,37 +22,69 @@ XBRA decomposes portfolio drawdown into three attribution buckets — **behavior
 
 ## Pipeline Architecture
 
-```
-Trade data
-    │
-    ▼
-[Ingestion & Normalizer]
-    │
-    ▼
-[Orchestrator — LangGraph DAG]
-    │
-    ├──────────────────────┐
-    ▼                      ▼
-[Behavior Agent]     [Market Agent]     ← parallel fan-out
-    │  (features +        │  (regime +
-    │   bias rules +       │   sentiment +
-    │   LLM analysis)      │   per-trade context)
-    │                      │
-    └──────────┬───────────┘
-               ▼
-         [Risk Agent]       ← waits for both; XGBoost + SHAP decomposition
-               │
-               ▼
-       [Strategy Agent]     ← k-means archetype classification
-               │
-               ▼
-       [Signal Fusion]      ← weighted combination (60% behavior / 25% strategy / 15% market)
-               │
-               ▼
-      [Explainability]      ← Ollama narrative + rule-based fallback
-               │
-               ▼
-         [Report]           ← ReportLab PDF + Plotly charts
+```mermaid
+flowchart TD
+    A(["`**Ingestion Layer**
+    CSV → Fills → Positions → InvestorProfile`"]) --> B
+
+    B(["`**Orchestrator**
+    LangGraph DAG · routes context object`"])
+
+    B --> C & D & E & F
+
+    C(["`**Behavior Agent**
+    Feature engineering
+    Dual-baseline scoring
+    XGBoost classifier
+    SHAP values
+    Bias scores + confidence
+    → BehaviorAgentOutput`"])
+
+    D(["`**Market Agent**
+    yfinance OHLCV
+    HMM regime · 3 states
+    Technical indicators
+    FinBERT sentiment
+    NewsAPI headlines
+    → MarketAgentOutput`"])
+
+    E(["`**Strategy Agent**
+    Trading patterns
+    K-means clustering
+    4 archetypes
+    Consistency flags
+    Anomaly detection
+    → StrategyAgentOutput`"])
+
+    F(["`**Risk Agent**
+    Drawdown · Sharpe
+    Sortino · VaR 95
+    R_behavioral
+    R_market · R_interaction
+    → RiskAgentOutput`"])
+
+    C & D & E & F --> G
+
+    G(["`**Signal Fusion**
+    Weighted aggregation · dominant bias · FusedBiasVector`"])
+
+    G --> H
+
+    H(["`**Explainability + LLM Report**
+    SHAP · stability check · Ollama narration · PDF output`"])
+
+    N["`Execution: Behavior → Market → Strategy → Risk sequentially.
+    Agents communicate only through the Orchestrator context object — no cross-agent imports.`"]
+
+    style A fill:#2d2d2d,stroke:#888,color:#ccc
+    style B fill:#1a2a4a,stroke:#4a90d9,color:#fff,stroke-width:2px
+    style C fill:#1a3a1a,stroke:#4caf50,color:#fff,stroke-width:2px
+    style D fill:#3a2a0a,stroke:#ff9800,color:#fff,stroke-width:2px
+    style E fill:#3a1a1a,stroke:#f44336,color:#fff,stroke-width:2px
+    style F fill:#1a1a3a,stroke:#9c27b0,color:#fff,stroke-width:2px
+    style G fill:#0a3a3a,stroke:#00bcd4,color:#fff,stroke-width:2px
+    style H fill:#2d2d2d,stroke:#888,color:#ccc
+    style N fill:#1a1a1a,stroke:#555,color:#aaa
 ```
 
 ---
