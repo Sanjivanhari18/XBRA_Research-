@@ -9,7 +9,7 @@ from typing import Any, Dict, List, Optional
 import numpy as np
 import pandas as pd
 
-from config.settings import MODELS_DIR, SHAP_STABILITY_THRESHOLD, XGBOOST_PARAMS
+from config.settings import MODELS_DIR, RAW_DIR, SHAP_STABILITY_THRESHOLD, XGBOOST_PARAMS
 from src.xbra.orchestrator.state import XBRAStateDict
 from src.xbra.schemas import MarketRegime, RiskAgentOutput
 
@@ -96,11 +96,86 @@ def build_feature_row(
 # Population-level XGBoost risk model
 # ---------------------------------------------------------------------------
 
+def _compute_market_features_from_cache(trades: list[dict]) -> dict:
+    """Compute market context features using cached OHLCV (no yfinance call).
+
+    Uses the price data cached by the synthetic generator.  Falls back to
+    neutral values when cache is unavailable or a symbol is missing.
+    """
+    from config.settings import RAW_DIR
+    try:
+        prices = pd.read_parquet(RAW_DIR / "ohlcv_close.parquet")
+    except Exception:
+        return {"avg_alpha": 0.0, "avg_sym_return": 0.0, "pct_negative_alpha": 0.5,
+                "pct_bull": 0.33, "pct_bear": 0.33, "pct_sideways": 0.34}
+
+    # Simple market benchmark: equal-weight average of all cached tickers
+    market_ret = prices.pct_change().mean(axis=1)
+
+    alphas, sym_rets, regime_labels = [], [], []
+    for t in trades:
+        sym = t.get("symbol", "")
+        if sym not in prices.columns:
+            continue
+        try:
+            e_ts = pd.Timestamp(t["entry_date"])
+            x_ts = pd.Timestamp(t["exit_date"])
+            sym_prices = prices[sym].dropna()
+            idx_e = sym_prices.index[sym_prices.index <= e_ts]
+            idx_x = sym_prices.index[sym_prices.index <= x_ts]
+            if idx_e.empty or idx_x.empty:
+                continue
+            p_e, p_x = sym_prices.loc[idx_e[-1]], sym_prices.loc[idx_x[-1]]
+            if p_e == 0:
+                continue
+            sym_r = (p_x / p_e) - 1
+
+            mkt_slice = market_ret[
+                (market_ret.index >= idx_e[-1]) & (market_ret.index <= idx_x[-1])
+            ]
+            mkt_r = float((1 + mkt_slice).prod() - 1) if not mkt_slice.empty else 0.0
+            alpha = sym_r - mkt_r
+
+            sym_rets.append(sym_r)
+            alphas.append(alpha)
+
+            # Regime: rolling 20-day mean return of the market at entry
+            mkt_prior = market_ret[market_ret.index <= idx_e[-1]].tail(20)
+            avg_mkt = float(mkt_prior.mean()) if not mkt_prior.empty else 0.0
+            if avg_mkt > 0.001:
+                regime_labels.append("bull")
+            elif avg_mkt < -0.001:
+                regime_labels.append("bear")
+            else:
+                regime_labels.append("sideways")
+        except Exception:
+            continue
+
+    if not alphas:
+        return {"avg_alpha": 0.0, "avg_sym_return": 0.0, "pct_negative_alpha": 0.5,
+                "pct_bull": 0.33, "pct_bear": 0.33, "pct_sideways": 0.34}
+
+    n = len(regime_labels)
+    return {
+        "avg_alpha":          round(float(np.mean(alphas)), 6),
+        "avg_sym_return":     round(float(np.mean(sym_rets)), 6),
+        "pct_negative_alpha": round(float(np.mean([a < 0 for a in alphas])), 4),
+        "pct_bull":     round(regime_labels.count("bull") / n, 4),
+        "pct_bear":     round(regime_labels.count("bear") / n, 4),
+        "pct_sideways": round(regime_labels.count("sideways") / n, 4),
+    }
+
+
 def _load_population_features() -> Optional[pd.DataFrame]:
-    """Load or compute feature matrix for all investors."""
+    """Load or compute feature matrix for all investors (behavioral + market)."""
     cache = MODELS_DIR / "population_features.parquet"
     if cache.exists():
-        return pd.read_parquet(cache)
+        # Invalidate cache if it was built without market features
+        existing = pd.read_parquet(cache)
+        if "avg_alpha" not in existing.columns:
+            cache.unlink()   # force rebuild with market features
+        else:
+            return existing
 
     try:
         from src.xbra.data.registry import DataRegistry
@@ -112,11 +187,12 @@ def _load_population_features() -> Optional[pd.DataFrame]:
         rows = []
         for inv_id in gt["investor_id"].tolist():
             try:
-                profile = load_from_parquet(inv_id, SYNTHETIC_DIR / "trades.parquet")
+                profile, _ = load_from_parquet(inv_id, SYNTHETIC_DIR / "trades.parquet")
                 trades  = [t.model_dump() for t in profile.trades]
                 feat    = engineer_features(profile)
+                mkt     = _compute_market_features_from_cache(trades)
                 metrics = compute_standard_metrics(trades)
-                row     = {**feat, "investor_id": inv_id, "max_drawdown": metrics["max_drawdown"]}
+                row     = {**feat, **mkt, "investor_id": inv_id, "max_drawdown": metrics["max_drawdown"]}
                 rows.append(row)
             except Exception:
                 continue

@@ -10,7 +10,7 @@ from datetime import date, datetime
 from enum import Enum
 from typing import Any, Dict, List, Optional
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 
 # ---------------------------------------------------------------------------
@@ -40,6 +40,49 @@ class StrategyArchetype(str, Enum):
 
 
 # ---------------------------------------------------------------------------
+# Ingestion layer types
+# ---------------------------------------------------------------------------
+
+class RawFill(BaseModel):
+    """Single fill record as parsed from a broker CSV export (before position reconstruction)."""
+    fill_id:    str
+    investor_id: str
+    symbol:     str
+    fill_date:  date
+    action:     str    # "buy" or "sell" (normalised by the ingestion layer)
+    quantity:   int
+    price:      float
+    fees:       float = 0.0
+
+    model_config = ConfigDict(frozen=True)
+
+    @field_validator("action")
+    @classmethod
+    def action_must_be_buy_or_sell(cls, v: str) -> str:
+        if v not in ("buy", "sell"):
+            raise ValueError(f"action must be 'buy' or 'sell', got {v!r}")
+        return v
+
+
+class NormalizationReport(BaseModel):
+    """Audit trail produced by the ingestion & normalisation stage.
+
+    Logged to SQLite in Phase 4; consumed by the Orchestrator to set initial
+    confidence context for all downstream agents.
+    """
+    investor_id:           str
+    raw_fill_count:        int
+    accepted_fill_count:   int
+    duplicate_fill_count:  int
+    rejected_fill_count:   int
+    rejected_reasons:      List[str] = Field(default_factory=list)
+    open_position_count:   int = 0
+    closed_position_count: int = 0
+    data_quality_score:    float = Field(ge=0.0, le=1.0)
+    timestamp:             datetime = Field(default_factory=datetime.utcnow)
+
+
+# ---------------------------------------------------------------------------
 # Core data units
 # ---------------------------------------------------------------------------
 
@@ -61,12 +104,13 @@ class Trade(BaseModel):
 
 
 class InvestorProfile(BaseModel):
-    investor_id:       str
-    ground_truth_bias: BiasType
-    n_trades:          int
-    trades:            List[Trade]
-    portfolio_value:   float = 100_000.0
-    metadata:          Dict[str, Any] = Field(default_factory=dict)
+    investor_id:        str
+    ground_truth_bias:  BiasType
+    n_trades:           int
+    trades:             List[Trade]
+    portfolio_value:    float = 100_000.0
+    data_quality_score: float = Field(default=1.0, ge=0.0, le=1.0)
+    metadata:           Dict[str, Any] = Field(default_factory=dict)
 
 
 # ---------------------------------------------------------------------------
@@ -80,11 +124,13 @@ class OrchestratorInput(BaseModel):
 
 
 class BehaviorAgentOutput(BaseModel):
-    investor_id:         str
-    loss_aversion_score: float = Field(ge=0.0, le=1.0)
+    investor_id:          str
+    loss_aversion_score:  float = Field(ge=0.0, le=1.0)
     overconfidence_score: float = Field(ge=0.0, le=1.0)
     herding_score:        float = Field(ge=0.0, le=1.0)
     disposition_score:    float = Field(ge=0.0, le=1.0)
+    predicted_bias:       Optional[str] = None   # XGBoost top-class prediction
+    classifier_confidence: float = Field(default=0.0, ge=0.0, le=1.0)
     confidence_per_bias:  Dict[str, float] = Field(default_factory=dict)
     evidencing_trade_ids: Dict[str, List[str]] = Field(default_factory=dict)
     llm_summary:          Optional[str] = None
@@ -92,12 +138,13 @@ class BehaviorAgentOutput(BaseModel):
 
 
 class MarketAgentOutput(BaseModel):
-    investor_id:         str
-    per_trade_context:   Dict[str, Dict[str, Any]] = Field(default_factory=dict)
-    regime_labels:       Dict[str, MarketRegime] = Field(default_factory=dict)
-    sentiment_scores:    Dict[str, float] = Field(default_factory=dict)
+    investor_id:           str
+    per_trade_context:     Dict[str, Dict[str, Any]] = Field(default_factory=dict)
+    regime_labels:         Dict[str, MarketRegime] = Field(default_factory=dict)
+    sentiment_scores:      Dict[str, float] = Field(default_factory=dict)
     market_explains_flags: Dict[str, bool] = Field(default_factory=dict)
-    llm_summary:         Optional[str] = None
+    confidence:            float = Field(default=1.0, ge=0.0, le=1.0)
+    llm_summary:           Optional[str] = None
 
 
 class RiskAgentOutput(BaseModel):
